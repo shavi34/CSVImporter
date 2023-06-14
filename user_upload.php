@@ -69,6 +69,17 @@ class Database
         )");
         echo "users table created successfully \n";
     }
+
+    public function insertRecord($name, $surname, $email)
+    {
+        $statement = $this->pdo->prepare("INSERT INTO users (name, surname, email) VALUES (?, ?, ?)");
+
+        try {
+            $statement->execute([$name, $surname, $email]);
+        } catch (PDOException $e) {
+            print_r("Failed to insert data: " . $e->getMessage() . "\n");
+        }
+    }
 }
 
 // Command line argument definition
