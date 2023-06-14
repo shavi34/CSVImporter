@@ -86,10 +86,12 @@ class CsvImporter
 {
     private $csvFile;
     private $db;
-    public function __construct($csvFile, $db)
+
+    public function __construct($csvFile, $db, $dryRun)
     {
         $this->csvFile = $csvFile;
         $this->db = $db;
+         $this->dryRun = $dryRun;
     }
 
     public function run()
@@ -116,6 +118,9 @@ class CsvImporter
         }
 
         fclose($file);
+        if ($this->dryRun) {
+            die("Dry Run :- CSV data processed, No data inserted into the 'users' table. \n");
+        }
         echo "CSV data successfully inserted into the 'users' table.\n";
     }
 
@@ -135,8 +140,8 @@ $short_options = "f:r::c::u:p:h:d:k::";
 $long_options = ["file:", "dry_run", "create_table::", "user_name:", "password:", "host:", "database:", "help",];
 
 $options = getopt($short_options, $long_options);
-
 $help = array_key_exists('help', $options) || array_key_exists('k', $options);
+$dryRun = array_key_exists('r', $options) || array_key_exists('dry_run', $options);
 $rebuild = isset($options['c']) || isset($options['create_table']);
 $csvFile = $options['f'] ?? $options['file'] ?? '';
 $host = $options['h'] ?? $options['host'] ?? '';
@@ -168,7 +173,5 @@ if (empty($password)) {
 $db = new Database($host, $db, $user, $password, $rebuild);
 $db->run();
 
-if ($db) {
-    $csvImporter = new CsvImporter($csvFile, $db);
-    $csvImporter->run();
-}
+$csvImporter = new CsvImporter($csvFile, $db, $dryRun);
+$csvImporter->run();
