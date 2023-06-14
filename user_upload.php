@@ -110,13 +110,24 @@ class CsvImporter
             $surname = ucfirst(strtolower($data[1]));
             $email = strtolower($data[2]);
 
-            $this->db->insertRecord($name, $surname, $email);
+            if ($this->validateEmail($email)) {
+                $this->db->insertRecord($name, $surname, $email);
+            }
         }
 
         fclose($file);
         echo "CSV data successfully inserted into the 'users' table.\n";
     }
 
+    private function validateEmail($email)
+    {
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            echo "Invalid email: $email\n";
+            return false;
+        }
+
+        return true;
+    }
 }
 
 // Command line argument definition
