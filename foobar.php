@@ -1,12 +1,12 @@
 <?php
 for ($i = 1; $i <= 100; $i++) {
   if ($i % 3 == 0 && $i % 5 == 0) {
-    echo "foobar\n";
+    echo "foobar, ";
   } elseif ($i % 3 == 0) {
-    echo "foo\n";
+    echo "foo, ";
   } elseif ($i % 5 == 0) {
-    echo "bar\n";
+    echo "bar, ";
   } else {
-    echo $i . "\n";
+    echo $i . ", ";
   }
 }
