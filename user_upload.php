@@ -153,9 +153,6 @@ if ($help) {
     Helper::showHelpers();
 }
 
-if (empty($csvFile)) {
-    die("CSV file path is required. use --help for more info\n");
-}
 if (empty($host)) {
     die("Mysql host is required. use --help for more info\n");
 }
@@ -173,5 +170,7 @@ if (empty($password)) {
 $db = new Database($host, $db, $user, $password, $rebuild);
 $db->run();
 
-$csvImporter = new CsvImporter($csvFile, $db, $dryRun);
-$csvImporter->run();
+if (!empty($csvFile)) {
+    $csvImporter = new CsvImporter($csvFile, $db, $dryRun);
+    $csvImporter->run();
+}
