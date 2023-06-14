@@ -82,6 +82,43 @@ class Database
     }
 }
 
+class CsvImporter
+{
+    private $csvFile;
+    private $db;
+    public function __construct($csvFile, $db)
+    {
+        $this->csvFile = $csvFile;
+        $this->db = $db;
+    }
+
+    public function run()
+    {
+        $this->processCsv();
+    }
+
+
+    private function processCsv()
+    {
+        $file = fopen($this->csvFile, 'r');
+        if (!$file) {
+            die("Failed to open CSV file.\n");
+        }
+
+        while (($data = fgetcsv($file)) !== false) {
+            $name = ucfirst(strtolower($data[0]));
+            $surname = ucfirst(strtolower($data[1]));
+            $email = strtolower($data[2]);
+
+            $this->db->insertRecord($name, $surname, $email);
+        }
+
+        fclose($file);
+        echo "CSV data successfully inserted into the 'users' table.\n";
+    }
+
+}
+
 // Command line argument definition
 $short_options = "f:r::c::u:p:h:d:k::";
 $long_options = ["file:", "dry_run", "create_table::", "user_name:", "password:", "host:", "database:", "help",];
@@ -119,3 +156,8 @@ if (empty($password)) {
 // Run the script
 $db = new Database($host, $db, $user, $password, $rebuild);
 $db->run();
+
+if ($db) {
+    $csvImporter = new CsvImporter($csvFile, $db);
+    $csvImporter->run();
+}
