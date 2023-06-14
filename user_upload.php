@@ -23,19 +23,24 @@ class Database
     private $dbName;
     private $userName;
     private $password;
+    private $rebuild;
     public $pdo;
 
-    public function __construct($host, $dbName, $userName, $password)
+    public function __construct($host, $dbName, $userName, $password, $rebuild)
     {
         $this->host = $host;
         $this->dbName = $dbName;
         $this->userName = $userName;
         $this->password = $password;
+        $this->rebuild = $rebuild;
     }
 
     public function run()
     {
         $this->connectToDatabase();
+        if ($this->rebuild) {
+            $this->rebuildUsersTable();
+        }
     }
 
     private function connectToDatabase()
@@ -52,6 +57,18 @@ class Database
             die("Database connection failed: " . $e->getMessage());
         }
     }
+
+    private function rebuildUsersTable()
+    {
+        $this->pdo->exec("DROP TABLE IF EXISTS users");
+        $this->pdo->exec("CREATE TABLE users (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(255) NOT NULL,
+            surname VARCHAR(255) NOT NULL,
+            email VARCHAR(255) NOT NULL UNIQUE
+        )");
+        echo "users table created successfully \n";
+    }
 }
 
 // Command line argument definition
@@ -61,6 +78,7 @@ $long_options = ["file:", "dry_run", "create_table::", "user_name:", "password:"
 $options = getopt($short_options, $long_options);
 
 $help = array_key_exists('help', $options) || array_key_exists('k', $options);
+$rebuild = isset($options['c']) || isset($options['create_table']);
 $csvFile = $options['f'] ?? $options['file'] ?? '';
 $host = $options['h'] ?? $options['host'] ?? '';
 $db = $options['d'] ?? $options['database'] ?? '';
@@ -88,5 +106,5 @@ if (empty($password)) {
 }
 
 // Run the script
-$db = new Database($host, $db, $user, $password);
+$db = new Database($host, $db, $user, $password, $rebuild);
 $db->run();
